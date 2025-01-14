@@ -9,7 +9,7 @@ Experimental. Do not use.
 The preferred installation method is homebrew:
 
 ```sh
-brew something something # TODO
+brew install merde-bot/tap/merde
 ```
 
 Experienced gophers and those modifying the software may choose to use `go install`. However, this is officially unsupported; you're on your own.
