@@ -41,3 +41,28 @@ release:
     ---
 
     Released by [GoReleaser](https://github.com/goreleaser/goreleaser).
+
+brews:
+  - name: merde
+    url_template: "https://github.com/merde-bot/merde-cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    url_headers:
+      - "Accept: application/octet-stream"
+      - 'Authorization: bearer #{ENV["HOMEBREW_GITHUB_API_TOKEN"]}'
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    directory: Formula
+    caveats: "👋"
+    dependencies:
+      - name: git
+        os: mac
+      - name: git
+        os: linux
+    test: |
+      system "#{bin}/merde version"
+    repository:
+      owner: merde-bot
+      name: homebrew-tap
+      git:
+        url: "git@github.com:merde-bot/homebrew-tap.git"
