@@ -66,3 +66,4 @@ brews:
       name: homebrew-tap
       git:
         url: "git@github.com:merde-bot/homebrew-tap.git"
+        private_key: "{{ .Env.PRIVATE_KEY_PATH }}"
