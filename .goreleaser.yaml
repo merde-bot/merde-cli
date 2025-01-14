@@ -36,6 +36,9 @@ changelog:
       - "^test:"
 
 release:
+  github:
+    owner: merde-bot
+    name: merde-cli
   footer: >-
 
     ---
