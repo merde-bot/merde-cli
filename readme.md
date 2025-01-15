@@ -2,7 +2,7 @@ This repository contains the source code for the [merde.ai](https://merde.ai/) c
 
 ## Status
 
-Experimental. Do not use.
+Experimental.
 
 ## Installation
 
@@ -10,6 +10,12 @@ The preferred installation method is homebrew:
 
 ```sh
 brew install merde-bot/tap/merde
+```
+
+To update:
+
+```sh
+brew upgrade merde-bot/tap/merde
 ```
 
 Experienced gophers and those modifying the software may choose to use `go install`. However, this is officially unsupported; you're on your own.

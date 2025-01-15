@@ -15,6 +15,13 @@ builds:
       - windows
       - darwin
     binary: merde
+    tags:
+      - release
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
 
 archives:
   - format: tar.gz
