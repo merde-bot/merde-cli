@@ -227,7 +227,7 @@ func mainTopic(ctx context.Context, cfg *Config, verb string, args []string) (st
 			return "", "", err
 		}
 		if !hasUpstream {
-			return "", "", fmt.Errorf("no upstream set for %s, please explicitly specify a main branch: merde rebase <main>", topicRef)
+			return "", "", fmt.Errorf("no upstream set for %s, please explicitly specify a main branch: merde %s <main>", topicRef, verb)
 		}
 		upstream, err := cfg.Git.AbbrevRef(ctx, topicRef+"@{upstream}")
 		if err != nil {
