@@ -45,6 +45,15 @@ func (g *Git) Version(ctx context.Context) (string, error) {
 		String()
 }
 
+func (g *Git) GitDir(ctx context.Context) (string, error) {
+	return g.baseCommand(ctx).
+		AppendArgs("rev-parse", "--git-dir").
+		Describe("get git dir").
+		Run().
+		TrimSpace().
+		String()
+}
+
 // MergeBases returns the merge bases of the given commits.
 func (g *Git) MergeBases(ctx context.Context, commits []string) ([]string, error) {
 	return g.baseCommand(ctx).

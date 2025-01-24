@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/dustin/go-humanize"
@@ -155,6 +156,10 @@ func doMerge(ctx context.Context, args []string) error {
 			return fmt.Errorf("merde merge does not support flags yet")
 		}
 	}
+	err = requireCleanGitStatus(ctx, cfg)
+	if err != nil {
+		return err
+	}
 	mainRef, topicRef, err := mainTopic(ctx, cfg, "merge", args)
 	if err != nil {
 		return err
@@ -181,6 +186,10 @@ func doRebase(ctx context.Context, args []string) error {
 			return fmt.Errorf("merde rebase does not support flags yet")
 		}
 	}
+	err = requireCleanGitStatus(ctx, cfg)
+	if err != nil {
+		return err
+	}
 	mainRef, topicRef, err := mainTopic(ctx, cfg, "rebase", args)
 	if err != nil {
 		return err
@@ -192,6 +201,27 @@ func doRebase(ctx context.Context, args []string) error {
 	}
 	info.verb = "rebase"
 	return processDeconflictRequest(ctx, cfg, info)
+}
+
+// requireCleanGitStatus checks that the git status is sufficiently clean for a deconflict operation.
+func requireCleanGitStatus(ctx context.Context, cfg *Config) error {
+	gitDir, err := cfg.Git.GitDir(ctx)
+	if err != nil {
+		return err
+	}
+	filesReason := map[string]string{
+		"MERGE_HEAD":       "merge is in progress",
+		"REBASE_HEAD":      "rebase is in progress",
+		"CHERRY_PICK_HEAD": "cherry-pick is in progress",
+		"REVERT_HEAD":      "revert is in progress",
+	}
+	for file, reason := range filesReason {
+		_, err := os.Stat(filepath.Join(gitDir, file))
+		if err == nil {
+			return fmt.Errorf("cannot proceed: %s", reason)
+		}
+	}
+	return nil
 }
 
 // mainTopic returns the main and topic refs, given args.
