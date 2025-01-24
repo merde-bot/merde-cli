@@ -172,7 +172,7 @@ func (g *Git) treesReferenced(ctx context.Context, commits []string) ([]string, 
 // varyingPaths returns the objects that correspond to different contents at the same path between the given trees.
 func (g *Git) varyingPaths(ctx context.Context, trees []string) ([]string, error) {
 	type contents struct {
-		typ    string // blob or tree
+		typ    string // blob or tree or commit
 		sha    string // sha of the object
 		varies bool   // known to vary?
 	}
@@ -197,7 +197,7 @@ func (g *Git) varyingPaths(ctx context.Context, trees []string) ([]string, error
 			}
 			typ, sha, path := parts[0], parts[1], parts[2]
 			switch typ {
-			case "blob", "tree":
+			case "blob", "tree", "commit":
 			default:
 				return nil, fmt.Errorf("unexpected object type: %s", typ)
 			}
@@ -221,6 +221,9 @@ func (g *Git) varyingPaths(ctx context.Context, trees []string) ([]string, error
 			}
 			// if there are any mismatches, it varies
 			if c.typ != typ || c.sha != sha {
+				if c.typ == "commit" || typ == "commit" {
+					return nil, fmt.Errorf("changes involving submodules are not supported")
+				}
 				c.varies = true
 				varying = append(varying, c.sha, sha)
 				pathContents[path] = c
