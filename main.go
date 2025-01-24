@@ -287,6 +287,9 @@ func makeDeconflictRequestInfo(ctx context.Context, cfg *Config, mainRef, topicR
 	if err != nil {
 		return nil, err
 	}
+	if mainSHA == topicSHA {
+		return nil, fmt.Errorf("%v and %v are the same", mainRef, topicRef)
+	}
 	fmt.Printf("analyzing...\n")
 	// TODO: this can be slow, might need a spinner
 	pack, err := cfg.Git.MergePack(ctx, mainSHA, topicSHA)
