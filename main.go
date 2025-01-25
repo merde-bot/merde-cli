@@ -209,11 +209,22 @@ func requireCleanGitStatus(ctx context.Context, cfg *Config) error {
 	if err != nil {
 		return err
 	}
+
+	rebaseDirs := []string{
+		"rebase-merge", "rebase-apply",
+	}
+	for _, dir := range rebaseDirs {
+		_, err := os.Stat(filepath.Join(gitDir, dir))
+		if err == nil {
+			return fmt.Errorf("cannot proceed: rebase in progress")
+		}
+	}
+
 	filesReason := map[string]string{
 		"MERGE_HEAD":       "merge is in progress",
-		"REBASE_HEAD":      "rebase is in progress",
 		"CHERRY_PICK_HEAD": "cherry-pick is in progress",
 		"REVERT_HEAD":      "revert is in progress",
+		"BISECT_LOG":       "bisect is in progress",
 	}
 	for file, reason := range filesReason {
 		_, err := os.Stat(filepath.Join(gitDir, file))
