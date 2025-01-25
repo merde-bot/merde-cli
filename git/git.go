@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"slices"
 	"strings"
 
 	"github.com/josharian/xc"
@@ -52,6 +53,41 @@ func (g *Git) GitDir(ctx context.Context) (string, error) {
 		Run().
 		TrimSpace().
 		String()
+}
+
+// Remotes returns all remote urls.
+func (g *Git) Remotes(ctx context.Context) ([]string, error) {
+	remotes, err := g.baseCommand(ctx).
+		AppendArgs("remote").
+		Describef("list remotes").
+		Run().
+		TrimSpace().
+		Split("\n")
+	if err != nil {
+		return nil, err
+	}
+	var all []string
+	for _, remote := range remotes {
+		urls, err := g.baseCommand(ctx).
+			AppendArgs("remote", "get-url", "--all", remote).
+			Describef("get URLs for remote %s", remote).
+			Run().
+			TrimSpace().
+			Split("\n")
+		if err != nil {
+			continue
+		}
+		for _, u := range urls {
+			if !strings.Contains(u, "github.com") && !strings.Contains(u, "gitlab.com") {
+				continue
+			}
+			// Quadratic but simpler, and nobody has _that_ many remotes. Right?
+			if !slices.Contains(all, u) {
+				all = append(all, u)
+			}
+		}
+	}
+	return all, nil
 }
 
 // MergeBases returns the merge bases of the given commits.

@@ -56,7 +56,8 @@ func helpRequest(ctx context.Context, cfg *Config, args []string) (*http.Request
 }
 
 func deconflictRequest(ctx context.Context, cfg *Config, info *deconflictRequestInfo) (*http.Request, error) {
-	return baseRequest(cfg).
+	remotes, _ := cfg.Git.Remotes(ctx) // best effort
+	req := baseRequest(cfg).
 		Path("/cli/"+info.verb+"/").
 		Param("args", info.args...).
 		Header("Main-Ref", info.mainRef).
@@ -65,8 +66,11 @@ func deconflictRequest(ctx context.Context, cfg *Config, info *deconflictRequest
 		Header("Topic-SHA", info.topicSHA).
 		Header("Pack-Size", fmt.Sprintf("%d", len(info.pack))).
 		Method("POST").
-		BodyReader(strings.NewReader(info.pack)).
-		Request(ctx)
+		BodyReader(strings.NewReader(info.pack))
+	for _, remote := range remotes {
+		req = req.Header("Remote", remote)
+	}
+	return req.Request(ctx)
 }
 
 // A Response is a response from the server.
