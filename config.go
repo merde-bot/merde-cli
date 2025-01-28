@@ -63,7 +63,7 @@ func Load(ctx context.Context, path string) (*Config, error) {
 		Values: values,
 		path:   path,
 	}
-	gg, err := git.NewGit(cfg.Get(gitExeKey))
+	gg, err := git.NewGit(ctx, cfg.Get(gitExeKey))
 	if err != nil {
 		return nil, err
 	}

@@ -16,31 +16,55 @@ import (
 )
 
 type Git struct {
-	bin string
+	bin  string
+	root string
 }
 
-func NewGit(bin string) (*Git, error) {
+func NewGit(ctx context.Context, bin string) (*Git, error) {
+	bin, err := gitExe(bin)
+	if err != nil {
+		return nil, err
+	}
+	git := &Git{bin: bin}
+	root, err := git.RootDir(ctx)
+	if err != nil {
+		return nil, err
+	}
+	git.root = root
+	return git, nil
+}
+
+func gitExe(bin string) (string, error) {
 	if bin != "" {
-		return &Git{bin: bin}, nil
+		return bin, nil
 	}
 	for _, gitExe := range []string{"git", "git.exe"} {
 		bin, err := exec.LookPath(gitExe)
 		if err == nil {
-			return &Git{bin: bin}, nil
+			return bin, nil
 		}
 	}
-	return nil, fmt.Errorf("git[.exe] not found in PATH")
+	return "", fmt.Errorf("git[.exe] not found in PATH")
 }
 
 // baseCommand constructs an xc git command.
 func (g *Git) baseCommand(ctx context.Context) *xc.Builder {
-	return xc.Command(ctx, g.bin)
+	return xc.Command(ctx, g.bin).Dir(g.root)
 }
 
 func (g *Git) Version(ctx context.Context) (string, error) {
 	return g.baseCommand(ctx).
 		AppendArgs("--version").
 		Describe("get git version").
+		Run().
+		TrimSpace().
+		String()
+}
+
+func (g *Git) RootDir(ctx context.Context) (string, error) {
+	return g.baseCommand(ctx).
+		AppendArgs("rev-parse", "--show-toplevel").
+		Describef("finding git root").
 		Run().
 		TrimSpace().
 		String()
