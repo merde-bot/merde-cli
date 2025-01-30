@@ -77,7 +77,12 @@ func DefaultPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(configDir, "merde", "config.json"), nil
+	merdeName := "merde"
+	// Keep dev configs separate from release configs.
+	if version == "dev" {
+		merdeName = "merde-dev"
+	}
+	return filepath.Join(configDir, merdeName, "config.json"), nil
 }
 
 func (c *Config) Update(pairs ...string) error {
